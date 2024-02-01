@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title%} MDB {% endblock title%}
+
+{% block content %}
+
+
+<div class="container-fluid px-0 mb-3">
+    <img src="/static/images/reg.jpeg" class="d-block w-100" alt="...">
+</div>
+
+<div class="container py-4">
+
+
+    <h1>User Password change</h1>
+    <form action="" method="post">
+
+        {% csrf_token %}
+
+        {{ pform.as_p }}  <!-- form variable captured from the context of render, as_p adds <p> tags to make it lukrative-->
+        
+
+        <button type="submit" class="btn btn-primary">Change pass</button>
+    </form>
+</div>
+
+{% endblock content %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title%} Register user all fields {% endblock title%}
+
+{% block content %}
+
+
+<div class="container-fluid px-0 mb-3">
+    <img src="/static/images/reg.jpeg" class="d-block w-100" alt="...">
+</div>
+
+<div class="container py-4">
+
+    {% if form.errors %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            There was some error with your form data
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      
+    {% endif %}
+
+    <div class="shadow p-4 mb-5 bg-body rounded">
+
+    <h1>User Registration</h1>
+    <form action="{% url 'register-user-all' %}" method="post">
+
+        {% csrf_token %}
+
+        {{ form.as_p }}  <!-- form variable captured from the context of render, as_p adds <p> tags to make it lukrative-->
+        
+
+        <button type="submit" class="btn btn-primary">Sign up</button>
+    </form>
+</div>
+</div>
+
+{% endblock content %}
