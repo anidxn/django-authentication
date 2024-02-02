@@ -56,7 +56,7 @@ ROOT_URLCONF = 'usrauth.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / "templates"],
+        'DIRS': [BASE_DIR / "templates"],       #  Added by Prasenjit ->>
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -101,6 +101,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+#  Added by Prasenjit ->>
+#  URLs used by built in auth functions
+LOGIN_URL = '/signin'   # The url pattern for accessing the login page
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -119,6 +123,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+#  Added by Prasenjit ->>
 STATICFILES_DIRS = [
     BASE_DIR / "static"  # os.path.join(BASE_DIR, "static")
     #,"/var/www/static/",

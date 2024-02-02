@@ -1,25 +1,34 @@
 from django.shortcuts import redirect, render
 
 from django.contrib import messages
+# --------- auth user model -----------
 from django.contrib.auth.models import User
-# to keep the user in session after password change
-from django.contrib.auth import update_session_auth_hash
 
 # ---- using the built in forms -------
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 # ---- for custom  forms ------
 from . import forms
 
+# ------- auth functions ---------
 from django.contrib.auth import logout, authenticate, login
+# to keep the user in session after password change
+from django.contrib.auth import update_session_auth_hash
+
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 def index_page(request):
-    # return HttpResponse('Homepage')
     messages.success(request, "Welcome")
     return render(request, 'index.html')
 
+#----------------------------------------------------------------------------------------
+# use of  login_required decorator:
+#   - if the user is logged in, execute the view normally
+#   - If the user isn't logged in, redirect to settings.LOGIN_URL
+# The redirection occurs without message
+#----------------------------------------------------------------------------------------
+@login_required
 def dash_page(request):
-    # return HttpResponse('about')
     return render(request, 'dashboard.html')
 
 def login_user(request):
@@ -131,6 +140,7 @@ def changepass_user(request):
 #----------------------------------------------------------------------------------
 #             Change password with authentication of old password
 #----------------------------------------------------------------------------------
+@login_required
 def changepass_withauth(request):
     myform = PasswordChangeForm(user=request.user, data=request.POST or None)
 
@@ -161,5 +171,6 @@ def update_profile(request):
 
         return render(request, 'authenticate/profile.html', {'user_form' : user_form})
     else:
+        messages.warning(request, "Please sign in to access this page")
         return redirect('home')
     
