@@ -1,7 +1,7 @@
 from typing import Any
 from django import forms
 # ---- built in forms-----
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm, SetPasswordForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm, SetPasswordForm, PasswordChangeForm
 
 from django.contrib.auth.models import User
 
@@ -14,7 +14,7 @@ class UserRegisterForm(UserCreationForm):
     widgets are optional parameters for making the form lukrative like bootstrap
     https://docs.djangoproject.com/en/5.0/ref/forms/widgets/
     """
-    email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder' : 'something@example.com'}))
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder' : 'something@django.com'}))
     first_name = forms.CharField(max_length=50, 
                                  widget=forms.TextInput(attrs={'class': 'form-control' }))
     last_name = forms.CharField(max_length=50, 
@@ -37,7 +37,6 @@ class UserRegisterForm(UserCreationForm):
         self.fields['username'].help_text = "<span class='form-text text-muted'><small>Required. maximum 50 characters allowed with letter, digits and @/./+/-/_<small><span>"
 
         self.fields['password1'].widget.attrs['class'] = 'form-control'
-
         self.fields['password2'].widget.attrs['class'] = 'form-control'
 
         # NO NEED TO USE OPTIONAL  widgets & custom labels for form fields xxxx ===>>>>> Wont work for UserCreationForm children
@@ -69,7 +68,10 @@ class UpdateProfileForm(UserChangeForm):
         self.fields['username'].label = 'User_name'
         self.fields['username'].help_text = "<span class='form-text text-muted'><small>Required. maximum 50 characters allowed with letter, digits and @/./+/-/_<small><span>"
 
-
+# =======================================================================================
+#           Custom Change password model without authenticating old password
+#           This form is just for MAKEUP purpose, you can directly use SetPasswordForm() from the view function
+# =======================================================================================
 class UpdatePasswordForm(SetPasswordForm):
     class Meta:  
         model = User
@@ -81,3 +83,4 @@ class UpdatePasswordForm(SetPasswordForm):
         self.fields['new_password1'].widget.attrs['class'] = 'form-control'
 
         self.fields['new_password2'].widget.attrs['class'] = 'form-control'
+

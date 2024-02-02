@@ -2,9 +2,11 @@ from django.shortcuts import redirect, render
 
 from django.contrib import messages
 from django.contrib.auth.models import User
+# to keep the user in session after password change
+from django.contrib.auth import update_session_auth_hash
 
 # ---- using the built in forms -------
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 # ---- for custom  forms ------
 from . import forms
 
@@ -51,9 +53,9 @@ def register_user(request):
         if myform.is_valid():  # validate the form
             myform.save()
 
-            messages.success(request, "Registration successfull")
+            messages.success(request, "Registration successfull.")
             
-            # registration complete ..now sign in
+            # registration complete ..now sign in, USE the cleaned_data() to get data from built-in forms
             uname = myform.cleaned_data['username']
             upass = myform.cleaned_data['password1']
             myuser = authenticate(username = uname, password = upass)
@@ -93,7 +95,9 @@ def register_user_all(request):
 
     return render(request, 'authenticate/register_user_all.html', {'form' : myform})
 
-
+#----------------------------------------------------------------------------------
+#                   Change password without authenticating old password
+#----------------------------------------------------------------------------------
 def changepass_user(request):
     if request.user.is_authenticated:
         current_user = request.user # * * * * * * * *
@@ -104,25 +108,41 @@ def changepass_user(request):
             
             myform = forms.UpdatePasswordForm(current_user, request.POST)
             if myform.is_valid():
-                #print('11111111')
-                myform.save()
+                myform.save()  # automatically logs out of the system
                 messages.success(request, "Your password is updated. please login again")
                 return redirect('signin')
+                # --------- to persist the same session ------
+                # update_session_auth_hash(request, myform.user)
+                # return redirect('dashboard')
             else:
-                #print('222222222')
                 #  * * * * * * * * error message handling * * * * * * * * * *
                 for error in list(myform.errors.values()):
                     messages.warning(request, error)
                 return redirect('change-pass')
                 
         else:
-            print('NEWWWWW')
             myform = forms.UpdatePasswordForm(current_user)
             return render(request, 'authenticate/change_pwd.html', {'pform' : myform})        
     
     else:
         messages.warning(request, "Please sign in to access this page")
         return redirect('signin')
+
+#----------------------------------------------------------------------------------
+#             Change password with authentication of old password
+#----------------------------------------------------------------------------------
+def changepass_withauth(request):
+    myform = PasswordChangeForm(user=request.user, data=request.POST or None)
+
+    if myform.is_valid():
+        myform.save()
+        # * * * * * * update the session after changing password so that the user isn't logged off. * * * * * 
+        update_session_auth_hash(request, myform.user)
+
+        messages.info(request, "Hoorrrayyyy !! Your password has changed")
+        return redirect('change-pass-auth')
+    
+    return render(request, 'authenticate/change_pwd.html', {'pform' : myform})
 
 #----------------------------------------------------------------------------------
 #                   Update profile
@@ -142,3 +162,4 @@ def update_profile(request):
         return render(request, 'authenticate/profile.html', {'user_form' : user_form})
     else:
         return redirect('home')
+    

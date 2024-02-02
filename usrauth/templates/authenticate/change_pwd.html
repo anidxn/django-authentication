@@ -10,6 +10,10 @@
 </div>
 
 <div class="container py-4">
+    {% if user.is_authenticated %}
+      Hello {{user}}
+    {% endif %}
+    <hr>
 
 
     <h1>User Password change</h1>

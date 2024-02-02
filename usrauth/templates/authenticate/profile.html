@@ -10,6 +10,10 @@
 </div>
 
 <div class="container py-4">
+    {% if user.is_authenticated %}
+      Hello {{user}}
+    {% endif %}
+    <hr>
 
     {% if user_form.errors %}
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
