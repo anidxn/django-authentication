@@ -1,4 +1,9 @@
+from base64 import urlsafe_b64encode
+from django.utils.encoding import force_byte, force_text
+
 from django.shortcuts import redirect, render
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
 
 from django.contrib import messages
 # --------- auth user model -----------
@@ -15,6 +20,9 @@ from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth import update_session_auth_hash
 
 from django.contrib.auth.decorators import login_required
+
+from . import utilities
+from .tokens import *
 
 # Create your views here.
 def index_page(request):
@@ -64,7 +72,7 @@ def register_user(request):
 
             messages.success(request, "Registration successfull.")
             
-            # registration complete ..now sign in, USE the cleaned_data() to get data from built-in forms
+            # registration complete ..now sign in, USE the cleaned_data[] to get data from built-in forms
             uname = myform.cleaned_data['username']
             upass = myform.cleaned_data['password1']
             myuser = authenticate(username = uname, password = upass)
@@ -84,7 +92,22 @@ def register_user_all(request):
         if myform.is_valid():  # validate the form
             myform.save()
 
-            messages.success(request, "Registration successfull")
+            messages.success(request, "Thank you. A confirmation mail has been sent to your registered email id.")
+
+            usr_fname = myform.cleaned_data['first_name']
+            myuser = User.objects.get(username = myform.cleaned_data['username'])
+
+            subject = "Welcome aboard..."
+            msg = "Hello " + usr_fname + " !!\n Thank you for registering with us. Please click on the following link to activate your account."
+
+            current_site = get_current_site(request)  # get the current site of the running application
+            msg2 = render_to_string('email_confirmation.html',
+                                    {'name': usr_fname,
+                                     'domain': current_site.domain,
+                                     'uid': urlsafe_b64encode(force_byte(myuser.pk)),
+                                      'token' : generate_token.make_token(myuser) })
+            
+            send_custom_email(subject, message, email)
             
             # registration complete ..now sign in
             """
