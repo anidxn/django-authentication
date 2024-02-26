@@ -1,4 +1,5 @@
-from base64 import urlsafe_b64decode, urlsafe_b64encode
+#from base64 import urlsafe_b64decode, urlsafe_b64encode
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 
 from django.shortcuts import redirect, render
@@ -72,7 +73,8 @@ def register_user(request):
 
             messages.success(request, "Registration successfull. Welcome "+ myform.cleaned_data['username'])
             
-            # registration complete ..now sign in, USE the cleaned_data[] to get data from built-in forms
+            # registration complete ..now sign in,
+            # * * * * * USE the cleaned_data[] to get data from built-in forms * * * * *
             uname = myform.cleaned_data['username']
             upass = myform.cleaned_data['password1']
             myuser = authenticate(username = uname, password = upass)
@@ -92,41 +94,17 @@ def register_user_all(request):
         if myform.is_valid():  # validate the form
             myform.save()
 
-            messages.success(request, "Thank you. A confirmation mail has been sent to your registered email id.")
+            messages.success(request, "Thank you for registering. A confirmation mail has been sent to your registered email id.")
 
-            """
-            usr_fname = myform.cleaned_data['first_name']
-            myuser = User.objects.get(username = myform.cleaned_data['username'])
+            subject= "Member registration"
+            msg2 = "Welcom Member!! \n Thank you for registering."
+            email = [myform.cleaned_data['email']]   # --->> get email from form data
+            utilities.send_custom_email(subject, msg2, email)
 
-            subject = "Welcome aboard..."
-            msg = "Hello " + usr_fname + " !!\n Thank you for registering with us. Please click on the following link to activate your account."
-
-            current_site = get_current_site(request)  # get the current site of the running application
-            msg2 = render_to_string('email_confirmation.html',
-                                    {'name': usr_fname,
-                                     'domain': current_site.domain,
-                                     'uid': urlsafe_b64encode(force_bytes(myuser.pk)),
-                                      'token' : generate_token.make_token(myuser) }) 
+            return redirect('/signin') # can login now -> already activated
             
-            send_custom_email(subject, msg2, email)
-            """
-            
-            # registration complete ..now sign in
-            """
-            # * * * * * Get Form Data like request parameters use cleaned_data ******
-            uname = myform.cleaned_data['username']
-            upass = myform.cleaned_data['password1']
-            myuser = authenticate(username = uname, password = upass)
-            if myuser is not None:
-                login(request, myuser)
-                return redirect('dashboard')
-            else:
-                messages.error(request, "Credential mismatch ..login again")
-                return redirect('signin')
-            """
     # else:
     myform = forms.UserRegisterForm()
-
     return render(request, 'authenticate/register_user_all.html', {'form' : myform})
 
 #----------------------------------------------------------------------------------
@@ -152,31 +130,33 @@ def register_verify(request):
 
         messages.success(request, "User registered successfully.Pls check mail.")
 
-        subject = "Welcome aboard...Pls confirm your email"
-        emsg = "Hello " + fname + " !!\n Thank you for registering with us. Please click on the following link to activate your account."
+        subject = "Welcome aboard!! Pls confirm your email"
+        #emsg = "Hello " + fname + " !!\n Thank you for registering with us. Please click on the following link to activate your account."
 
         current_site = get_current_site(request)  # get the current site of the running application
+        
+        # building the message --> take content of email_confirmation.html (it includes username + link to activation URL with user id (base64 encoded) & token)
+        # the extra details are passed as token to the email_confirmation.html - just like render()
         msg2 = render_to_string('email_confirmation.html',
-                                    {'name': fname,
+                                    {'name': myuser.first_name,
                                      'domain': current_site.domain,
-                                     'uid': urlsafe_b64encode(force_bytes(myuser.pk)),
+                                     'uid': urlsafe_base64_encode(force_bytes(myuser.pk)),
                                       'token' : generate_token.make_token(myuser) }) 
             
         utilities.send_custom_email(subject, msg2, uemail)
 
-        
-        # redirect to login page
-        return redirect('/signin')  # * * * * * * /restroapp/ is required ...
+        return redirect('/signin') # redirect to login page --> can't login unless activated
 
     return render(request, 'authenticate/register_verify.html')
 
-
-def activate_user(request, uid64, token):
+#------ function called upon clicking on the activation link page -------
+def activate_user(request, uidb64, token):
     myuser = None
     try:
-        uid = force_str(urlsafe_b64decode(uid64))
+        uid = force_str(urlsafe_base64_decode(uidb64))  # get the uid from url & perform base64 decode
         myuser = User.objects.get(pk = uid)
-    except (User.DoesNotExist, Exception):
+        print(myuser)
+    except (TypeError, ValueError, User.DoesNotExist, Exception):
         myuser = None
 
     if myuser is not None and generate_token.check_token(myuser, token):

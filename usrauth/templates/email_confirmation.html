@@ -6,6 +6,9 @@ Hello {{name}}
 
 Please confirm your email  by clicking on the following link.
 
-Confirmation Link: http://{{ domain }}{% url 'activate' uid64=uid token=token %}
+Confirmation Link: http://{{ domain }}{% url 'activate' uidb64=uid token=token %} 
+<!-- calls the activate_user view function & passes uid & token as parameter 
+uid(base64 encoded) & token are received from the context passed by render_to_string() function
+-->
 
 {% endautoescape %}

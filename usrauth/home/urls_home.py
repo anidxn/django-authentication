@@ -12,7 +12,7 @@ urlpatterns = [
     path('register-user-all/', views.register_user_all, name = 'register-user-all'),
 
     path('register-verify/', views.register_verify, name = 'register-verify'),
-    path('activate/<uid64>/<token>', views.activate_user, name = 'activate'),
+    path('activate/<uidb64>/<token>', views.activate_user, name = 'activate'),
 
     path('signin/', views.login_user, name = 'signin'),
     path('changepass/', views.changepass_user, name='change-pass'),         # change password without authentication
