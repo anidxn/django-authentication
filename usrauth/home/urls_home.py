@@ -24,18 +24,32 @@ urlpatterns = [
     path('profile/', views.update_profile, name='profile'),
 
     #----------- Class based views for password reset ------------
-    path('reset_password/', auth_views.PasswordResetView.as_view(), name='reset_password'),
-    path('reset_password_sent/', auth_views.PasswordResetDoneView.as_view(), name='reset_password1'),
-    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='reset_password2'),
-    path('reset_password_complete/', auth_views.PasswordResetCompleteView.as_view())
+    path('reset_password/', 
+         auth_views.PasswordResetView.as_view(template_name='resetpass/password_reset.html'),
+           name='reset_password'),
+    path('reset_password_sent/', 
+         auth_views.PasswordResetDoneView.as_view(template_name='resetpass/password_reset_sent.html'),
+           name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', 
+         auth_views.PasswordResetConfirmView.as_view(template_name='resetpass/password_reset_form.html'), 
+           name='password_reset_confirm'), 
+    path('reset_password_complete/',
+          auth_views.PasswordResetCompleteView.as_view(),
+            name='password_reset_complete') # template_name='resetpass/password_reset_done.html'
 ]
 
 '''
-Forgot password======================
+Forgot password ======================
 CONDITION: the email you will enter in the form , that email must belong to 1 of the registered USERS
-1. submit email form                        PasswordRest
-2. Email sent success message
-3. Link to password reset form in email
-4. Password successfully changed message
+1. submit email form                        - PasswordResetView()
+2. Email sent success message               - PasswordResetDoneView()
+3. Link to password reset form in email     - PasswordResetConfirmView()
+4. Password successfully changed message    - PasswordResetCompleteView()
+
+Using django's default templates ===============
+path('reset_password/', auth_views.PasswordResetView.as_view(), name='reset_password'),
+path('reset_password_sent/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
+path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+path('reset_password_complete/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete')
 
 '''
